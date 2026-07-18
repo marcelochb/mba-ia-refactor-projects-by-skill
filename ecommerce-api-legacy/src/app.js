@@ -1,14 +1,29 @@
+'use strict';
+
+// Composition root — monta a aplicação (config, DB, rotas, error handler).
 const express = require('express');
-const AppManager = require('./AppManager');
-const { config } = require('./utils');
+const config = require('./config');
+const db = require('./config/database');
+const routes = require('./routes');
+const { errorHandler } = require('./middlewares/errorHandler');
 
-const app = express();
-app.use(express.json());
+async function bootstrap() {
+    const app = express();
+    app.use(express.json());
 
-const manager = new AppManager();
-manager.initDb();
-manager.setupRoutes(app);
+    await db.init();
 
-app.listen(config.port, () => {
-    console.log(`Frankenstein LMS rodando na porta ${config.port}...`);
+    app.use('/api', routes);
+    app.use(errorHandler);
+
+    app.listen(config.port, () => {
+        console.log(`LMS API rodando na porta ${config.port}...`);
+    });
+
+    return app;
+}
+
+bootstrap().catch((err) => {
+    console.error('Falha ao iniciar a aplicação:', err.message);
+    process.exit(1);
 });
