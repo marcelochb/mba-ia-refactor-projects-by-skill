@@ -1,6 +1,12 @@
 """Configuração da aplicação — lida de variáveis de ambiente (sem segredos hardcoded)."""
 import os
 
+from dotenv import load_dotenv
+
+# Carrega o .env para os.environ. Vars já definidas no ambiente têm prioridade
+# (override=False), permitindo sobrescrever a config em produção/CI sem tocar no arquivo.
+load_dotenv(override=False)
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-change-me")
 DEBUG = os.environ.get("DEBUG", "false").lower() == "true"
 DB_PATH = os.environ.get("DB_PATH", "loja.db")
